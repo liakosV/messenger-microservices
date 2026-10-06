@@ -1,0 +1,25 @@
+# Build outputs and dependencies
+**/.gradle/
+**/build/
+**/node_modules/
+**/dist/
+**/coverage/
+*.tsbuildinfo
+*.log
+
+# Local configuration, credentials and signing keys
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Editor and OS files
+**/.idea/
+**/.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+**/HELP.md
