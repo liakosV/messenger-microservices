@@ -1,0 +1,3 @@
+export const CONVERSATION_PAGE_SIZE = 30;
+export const MESSAGE_PAGE_SIZE = 50;
+export const CONVERSATION_POLL_INTERVAL_MS = 30_000;

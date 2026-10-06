@@ -1,0 +1,263 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+:root {
+  font-family: Manrope, 'Segoe UI', sans-serif;
+  color: #243c32;
+  background: #f1f2eb;
+  font-synthesis: none;
+  font-weight: 500;
+  --green: #235c43;
+  --muted: #829088;
+  --line: #e5e9e2;
+  --lime: #e8f3c9;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+button,
+input,
+textarea {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+  transition:
+    background 0.18s,
+    transform 0.18s;
+  color: inherit;
+}
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid #8db778;
+  outline-offset: 4px;
+}
+input:focus,
+textarea:focus {
+  outline: 2px solid #94b6a1;
+  outline-offset: 1px;
+}
+button {
+  border: 0;
+}
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+input,
+textarea {
+  width: 100%;
+  border: 1px solid #dce3db;
+  border-radius: 10px;
+  background: #fff;
+  padding: 12px 14px;
+  color: #263b31;
+  min-width: 0;
+}
+input::placeholder,
+textarea::placeholder {
+  color: #9aa69e;
+}
+textarea {
+  resize: vertical;
+}
+label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+label input,
+label textarea {
+  display: block;
+  margin-top: 7px;
+  font-size: 13px;
+  font-weight: 500;
+}
+form > label,
+form > .form-row {
+  margin-bottom: 17px;
+}
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 13px;
+}
+.muted {
+  color: #77867e;
+  font-size: 13px;
+  line-height: 1.8;
+}
+.eyebrow {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #809587;
+}
+.primary,
+.secondary,
+.danger {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 19px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  min-height: 44px;
+}
+.primary {
+  background: var(--green);
+  color: #fff;
+}
+.primary:hover {
+  background: #174b34;
+  transform: translateY(-1px);
+}
+.secondary {
+  background: #eef1eb;
+}
+.danger {
+  background: #a63e3e;
+  color: white;
+}
+.danger:hover {
+  background: #913030;
+}
+.wide {
+  width: 100%;
+}
+.text-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: none;
+  color: var(--green);
+  font-size: 11px;
+  padding: 10px 0;
+}
+.icon-button {
+  background: transparent;
+  padding: 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: #77877d;
+  flex-shrink: 0;
+}
+.icon-button:hover {
+  background: #eef2e9;
+  color: var(--green);
+}
+.error,
+.success {
+  font-size: 12px;
+  line-height: 1.7;
+  padding: 10px 13px;
+  border-radius: 8px;
+  margin: 12px 0;
+}
+.error {
+  background: #fff0ed;
+  color: #9e3f34;
+}
+.success {
+  background: #edf4df;
+  color: #345c36;
+}
+.danger-text {
+  color: #a94339 !important;
+}
+.center {
+  text-align: center;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 23px;
+  letter-spacing: -1px;
+  font-weight: 800;
+}
+.brand-symbol {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: var(--green);
+  color: var(--lime);
+}
+.brand-dot {
+  color: #8da569;
+}
+.avatar {
+  width: 43px;
+  height: 43px;
+  background: #e8eee2;
+  color: #63765b;
+  border-radius: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.avatar.small {
+  width: 35px;
+  height: 35px;
+  border-radius: 12px;
+  font-size: 11px;
+}
+.copy-id {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #668576;
+  background: none;
+  padding: 7px 0;
+  font-size: 10px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+.status-dot {
+  height: 6px;
+  width: 6px;
+  border-radius: 50%;
+  display: inline-block;
+  background: #90b565;
+  flex-shrink: 0;
+}
+.status-dot.offline {
+  background: #cc9b64;
+}
+.status-dot.connecting {
+  background: #b2b78b;
+  animation: pulse 1.2s infinite;
+}
+@keyframes pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+.boot-screen {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 25px;
+}

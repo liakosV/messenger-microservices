@@ -1,0 +1,209 @@
+@media (min-width: 1450px) {
+  .workspace {
+    grid-template-columns: 80px 365px minmax(0, 1fr);
+  }
+  .sidebar-brand,
+  .sidebar-heading {
+    padding-left: 30px;
+    padding-right: 30px;
+  }
+  .conversation {
+    padding: 20px 20px;
+  }
+  .chat-header {
+    padding: 25px 40px;
+  }
+  .bubble p {
+    font-size: 13px;
+  }
+  .composer-wrap {
+    padding: 20px 45px;
+  }
+}
+@media (max-width: 1000px) {
+  .workspace {
+    grid-template-columns: 60px 280px minmax(0, 1fr);
+  }
+  .rail {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  .sidebar-brand,
+  .sidebar-heading {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  .pill {
+    display: none;
+  }
+  .search {
+    margin-left: 20px;
+    margin-right: 20px;
+  }
+  .conversation {
+    padding: 16px 10px;
+    gap: 8px;
+  }
+  .conversation-date {
+    display: none;
+  }
+  .connection-right {
+    display: none;
+  }
+  .message-content {
+    max-width: 85%;
+  }
+  .auth-story {
+    padding: 35px;
+  }
+  .story-content h1 {
+    font-size: 36px;
+  }
+  .auth-panel {
+    padding: 30px;
+  }
+  .auth-card h2 {
+    font-size: 24px;
+  }
+}
+@media (max-width: 700px) {
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+  .rail {
+    display: none;
+  }
+  .sidebar {
+    border-right: 0;
+  }
+  .sidebar-brand {
+    padding: 25px 23px 28px;
+  }
+  .sidebar-brand .brand-symbol {
+    display: grid;
+  }
+  .sidebar-brand .brand {
+    font-size: 23px;
+  }
+  .pill {
+    display: block;
+  }
+  .sidebar-heading {
+    padding: 0 23px;
+  }
+  .sidebar-heading h1 {
+    font-size: 27px;
+  }
+  .conversation {
+    padding: 19px 16px;
+    gap: 13px;
+  }
+  .conversation-text strong {
+    font-size: 13px;
+  }
+  .conversation-text p {
+    font-size: 11px;
+  }
+  .conversation-date {
+    display: block;
+  }
+  .chat-panel {
+    display: none;
+  }
+  .has-selection .sidebar {
+    display: none;
+  }
+  .has-selection .chat-panel {
+    display: flex;
+    height: 100dvh;
+  }
+  .mobile-back {
+    display: flex;
+  }
+  .chat-header {
+    padding: 17px 14px;
+    gap: 9px;
+  }
+  .chat-header .avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+  }
+  .chat-heading h2 {
+    font-size: 12px;
+  }
+  .connection-bar {
+    padding: 0 17px;
+    height: 36px;
+  }
+  .messages {
+    padding: 12px 16px 25px;
+  }
+  .message-content {
+    max-width: 85%;
+  }
+  .message-actions {
+    opacity: 1;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .bubble {
+    padding: 10px 13px 8px;
+  }
+  .bubble p {
+    font-size: 12px;
+  }
+  .composer-wrap {
+    padding: 13px 14px 14px;
+    padding-bottom: max(14px, env(safe-area-inset-bottom));
+  }
+  .composer-note {
+    font-size: 7px;
+  }
+  .auth-page {
+    display: flex;
+    flex-direction: column;
+  }
+  .auth-story {
+    padding: 23px;
+    background: #e9efdd;
+  }
+  .auth-story .story-content,
+  .auth-story .story-footer {
+    display: none;
+  }
+  .auth-panel {
+    flex: 1;
+    padding: 38px 26px;
+  }
+  .auth-card h2 {
+    font-size: 26px;
+  }
+  .auth-card {
+    max-width: 420px;
+  }
+  .modal {
+    padding: 22px;
+  }
+  .member .uuid-full {
+    font-size: 9px;
+  }
+  .form-row {
+    gap: 10px;
+  }
+  .profile-id .uuid-full {
+    font-size: 9px;
+  }
+  .sidebar-footer {
+    padding-bottom: max(18px, env(safe-area-inset-bottom));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *:before,
+  *:after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

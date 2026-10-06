@@ -1,0 +1,92 @@
+.welcome {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 40px 20px;
+}
+.welcome-art {
+  position: relative;
+  width: 270px;
+  height: 180px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 25px;
+}
+.orbit-ring {
+  position: absolute;
+  inset: 0 45px;
+  border: 1px solid #e1e8d7;
+  border-radius: 50%;
+  transform: rotate(-25deg);
+}
+.welcome-icon {
+  background: #e9f0de;
+  width: 104px;
+  height: 104px;
+  border-radius: 31px;
+  display: grid;
+  place-items: center;
+  color: #7e985f;
+  transform: rotate(-7deg);
+  box-shadow: 0 12px 30px #82926d09;
+}
+.floating-note {
+  position: absolute;
+  background: #fff;
+  border: 1px solid #e5ebdb;
+  font-size: 10px;
+  padding: 10px 17px;
+  border-radius: 12px;
+  box-shadow: 0 6px 10px #82926d04;
+  color: #91a57c;
+}
+.floating-note.one {
+  left: 0;
+  top: 35px;
+  transform: rotate(-10deg);
+}
+.floating-note.two {
+  right: -3px;
+  bottom: 18px;
+  transform: rotate(6deg);
+  background: #eaf1dc;
+}
+.spark {
+  position: absolute;
+  right: 35px;
+  top: 8px;
+  color: #bacda1;
+  font-size: 28px;
+}
+.welcome .eyebrow {
+  font-size: 8px;
+  letter-spacing: 2px;
+}
+.welcome h2 {
+  font-size: 36px;
+  line-height: 1.25;
+  letter-spacing: -1.7px;
+  font-weight: 600;
+  margin: 18px 0;
+}
+.welcome > p {
+  font-size: 11px;
+  line-height: 1.9;
+  color: #95a386;
+}
+.welcome .primary {
+  margin-top: 27px;
+  font-size: 11px;
+  padding: 12px 20px;
+}
+.welcome-footnote {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 48px;
+  font-size: 8px;
+  color: #a6b397;
+}
