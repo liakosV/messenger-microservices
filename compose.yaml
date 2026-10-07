@@ -1,0 +1,73 @@
+services:
+  identity-service:
+    image: identity-service:local
+    ports:
+      - "127.0.0.1:8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/identity_db
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      IDENTITY_JWT_PRIVATE_KEY: file:/app/keys/private.pem
+      IDENTITY_JWT_PUBLIC_KEY: file:/app/keys/public.pem
+      IDENTITY_JWT_ISSUER: http://localhost:8082
+    volumes:
+      - type: bind
+        source: C:/Users/Liakos/.messenger-identity-keys
+        target: /app/keys
+        read_only: true
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  chat-service:
+    image: chat-service:local
+    ports:
+      - "127.0.0.1:8083:8083"
+    environment:
+      CHAT_DB_URL: jdbc:mysql://mysql:3306/chat_db
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      CHAT_JWT_PUBLIC_KEY: file:/app/keys/public.pem
+      IDENTITY_JWT_ISSUER: http://localhost:8082
+      IDENTITY_BASE_URL: http://identity-service:8082
+    volumes:
+      - type: bind
+        source: C:/Users/Liakos/.messenger-identity-keys
+        target: /app/keys
+        read_only: true
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  mysql:
+    image: mysql:8.4.6-oraclelinux9
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - mysql_data_v2:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - 'MYSQL_PWD="$${MYSQL_ROOT_PASSWORD}" mysql --protocol=TCP -h 127.0.0.1 -u root -e "SELECT 1"'
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "127.0.0.1:5173:80"
+    depends_on:
+      - identity-service
+      - chat-service
+
+volumes:
+  mysql_data:
+  mysql_data_v2:
+
+      
