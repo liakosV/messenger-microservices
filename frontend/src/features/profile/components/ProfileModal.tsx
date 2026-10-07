@@ -1,3 +1,5 @@
+import { DateOfBirthField } from '../../../shared/components/DateOfBirthField';
+import { PhoneField } from '../../../shared/components/PhoneField';
 import type { Profile } from '../model/types';
 import { Avatar } from '../../../shared/components/Avatar';
 import { CopyId } from '../../../shared/components/CopyId';
@@ -66,25 +68,8 @@ export function ProfileModal({ profile, token, close, updated, logout, onError }
               />
             </label>
             <div className="form-row">
-              <label>
-                Ημερομηνία γέννησης
-                <input
-                  name="dateOfBirth"
-                  type="date"
-                  defaultValue={profile.dateOfBirth}
-                  max={new Date(Date.now() - 86400000).toISOString().slice(0, 10)}
-                  required
-                />
-              </label>
-              <label>
-                Τηλέφωνο
-                <input
-                  name="phoneNumber"
-                  defaultValue={profile.phoneNumber}
-                  maxLength={255}
-                  required
-                />
-              </label>
+              <DateOfBirthField defaultValue={profile.dateOfBirth} />
+              <PhoneField defaultValue={profile.phoneNumber} />
             </div>
             <label>
               Νέος κωδικός <span className="muted">· προαιρετικό</span>

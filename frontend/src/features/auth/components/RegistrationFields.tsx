@@ -1,3 +1,5 @@
+import { DateOfBirthField } from '../../../shared/components/DateOfBirthField';
+import { PhoneField } from '../../../shared/components/PhoneField';
 export function RegistrationFields() {
   return (
     <>
@@ -25,26 +27,8 @@ export function RegistrationFields() {
         />
       </label>
       <div className="form-row">
-        <label>
-          Ημερομηνία γέννησης
-          <input
-            name="dateOfBirth"
-            type="date"
-            max={new Date(Date.now() - 86400000).toISOString().slice(0, 10)}
-            required
-          />
-        </label>
-        <label>
-          Τηλέφωνο
-          <input
-            name="phoneNumber"
-            type="tel"
-            autoComplete="tel"
-            maxLength={255}
-            placeholder="+30…"
-            required
-          />
-        </label>
+        <DateOfBirthField />
+        <PhoneField />
       </div>
     </>
   );
