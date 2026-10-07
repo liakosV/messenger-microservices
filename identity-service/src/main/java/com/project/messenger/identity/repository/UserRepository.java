@@ -12,6 +12,8 @@ import java.util.UUID;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
+    Optional<User> findByUsernameAndDeletedFalse(String username);
+
     long countByUuidInAndDeletedFalse(Set<UUID> uuids);
 
     @Query("select u from User u where u.deleted = false and "

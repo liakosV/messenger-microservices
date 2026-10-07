@@ -237,6 +237,42 @@ class UserControllerTest {
         verify(repository, never()).countByUuidInAndDeletedFalse(any());
     }
 
+    @Test
+    void usernameResolutionRequiresAuthenticationAndReturnsOnlyPublicIdentifiers() throws Exception {
+        when(repository.findByUsernameAndDeletedFalse("alice")).thenReturn(Optional.of(user));
+        mvc.perform(post("/api/users/resolve-usernames").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"usernames\":[\"alice\"]}"))
+                .andExpect(status().isUnauthorized());
+        mvc.perform(post("/api/users/resolve-usernames").header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"usernames\":[\"alice\",\"alice\"]}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].uuid").value(user.getUuid().toString()))
+                .andExpect(jsonPath("$[0].username").value("alice"))
+                .andExpect(jsonPath("$[0].email").doesNotExist())
+                .andExpect(jsonPath("$[0].phoneNumber").doesNotExist())
+                .andExpect(jsonPath("$[0].dateOfBirth").doesNotExist())
+                .andExpect(jsonPath("$[0].password").doesNotExist())
+                .andExpect(header().string("Cache-Control", "no-store"));
+        verify(repository, times(1)).findByUsernameAndDeletedFalse("alice");
+    }
+
+    @Test
+    void usernameResolutionRejectsMissingInactiveAndInvalidUsers() throws Exception {
+        mvc.perform(post("/api/users/resolve-usernames").header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"usernames\":[\"missing\"]}"))
+                .andExpect(status().isNotFound());
+        for (String body : new String[]{"{\"usernames\":[]}", "{\"usernames\":[null]}", "{\"usernames\":[\"bad name\"]}"}) {
+            mvc.perform(post("/api/users/resolve-usernames").header("Authorization", "Bearer " + token)
+                            .contentType(MediaType.APPLICATION_JSON).content(body))
+                    .andExpect(status().isBadRequest());
+        }
+        user.setDeleted(true);
+        mvc.perform(post("/api/users/resolve-usernames").header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"usernames\":[\"alice\"]}"))
+                .andExpect(status().isNotFound());
+        verify(repository, never()).findByUsernameAndDeletedFalse("alice");
+    }
+
     @Configuration
     @EnableWebMvc
     @EnableWebSecurity

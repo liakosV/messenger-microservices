@@ -31,7 +31,7 @@ export async function request<T>(
     const problem = await response.json().catch(() => ({}));
     const details: Record<string, string> = {
       'One or more participants do not exist or are inactive':
-        'Ένα ή περισσότερα UUID δεν ανήκουν σε ενεργούς χρήστες.',
+        'Ένας ή περισσότεροι συμμετέχοντες δεν έχουν ενεργό λογαριασμό.',
       'Account details are already in use':
         'Αυτά τα στοιχεία χρησιμοποιούνται ήδη από άλλον λογαριασμό.',
       'Invalid credentials': 'Τα στοιχεία σύνδεσης ή ο κωδικός δεν είναι σωστά.',

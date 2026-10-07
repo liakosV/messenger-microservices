@@ -3,6 +3,8 @@ package com.project.messenger.identity.controller;
 import com.project.messenger.identity.dto.user.DeleteUserRequest;
 import com.project.messenger.identity.dto.user.UserReadDTO;
 import com.project.messenger.identity.dto.user.UserUpdateDTO;
+import com.project.messenger.identity.dto.user.UsernameReadDTO;
+import com.project.messenger.identity.dto.user.UsernameResolutionRequest;
 import com.project.messenger.identity.service.UserService;
 import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -14,11 +16,13 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,6 +31,14 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
+
+    @PostMapping("/resolve-usernames")
+    public ResponseEntity<List<UsernameReadDTO>> resolveUsernames(
+            @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody UsernameResolutionRequest request) {
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore())
+                .body(userService.resolveUsernames(UUID.fromString(jwt.getSubject()), request.usernames()));
+    }
 
     @GetMapping("/me")
     public ResponseEntity<UserReadDTO> getCurrentUser(@AuthenticationPrincipal Jwt jwt) {

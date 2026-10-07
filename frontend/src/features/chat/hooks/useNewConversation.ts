@@ -1,8 +1,7 @@
 import { useState, type FormEvent } from 'react';
-import { ApiError } from '../../../shared/api/client';
+import { ApiError, request, json } from '../../../shared/api/client';
 import { errorMessage } from '../../../shared/utils/errors';
 import { conversationApi } from '../api/conversationApi';
-import { participantIds } from '../model/conversations';
 import type { Conversation } from '../model/types';
 
 interface Options {
@@ -20,7 +19,34 @@ export function useNewConversation({ token, callerUuid, onCreated, onError }: Op
     setBusy(true);
     setModalError('');
     try {
-      onCreated(await conversationApi.create(token, participantIds(newIds, callerUuid)));
+      const usernames = [
+        ...new Set(
+          newIds
+            .trim()
+            .split(/[\s,;]+/)
+            .filter(Boolean),
+        ),
+      ];
+      if (
+        !usernames.length ||
+        usernames.length > 99 ||
+        usernames.some((name) => !/^[a-zA-Z0-9._-]{3,30}$/.test(name))
+      ) {
+        throw new Error('Βάλε 1–99 έγκυρα ονόματα χρήστη, χωρισμένα με κόμμα ή νέα γραμμή.');
+      }
+      let users: { uuid: string; username: string }[];
+      try {
+        users = await request('/identity/api/users/resolve-usernames', token, json({ usernames }));
+      } catch (error) {
+        if (error instanceof ApiError && error.status === 404)
+          throw new Error(
+            'Ένα ή περισσότερα ονόματα χρήστη δεν βρέθηκαν. Έλεγξε την ορθογραφία και ότι ο λογαριασμός είναι ενεργός.',
+          );
+        throw error;
+      }
+      const ids = [...new Set(users.map((user) => user.uuid))].filter((id) => id !== callerUuid);
+      if (!ids.length) throw new Error('Πρόσθεσε τουλάχιστον έναν άλλον χρήστη.');
+      onCreated(await conversationApi.create(token, ids));
     } catch (error) {
       setModalError(errorMessage(error));
       if (error instanceof ApiError && error.status === 401) onError(error);

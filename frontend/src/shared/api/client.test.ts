@@ -40,7 +40,7 @@ describe('API requests', () => {
     expect(fetcher.mock.calls[0][1].headers.Authorization).toBe('Bearer token');
     await expect(request('/chat/api/conversations', 'token')).rejects.toMatchObject({
       status: 400,
-      message: 'Ένα ή περισσότερα UUID δεν ανήκουν σε ενεργούς χρήστες.',
+      message: 'Ένας ή περισσότεροι συμμετέχοντες δεν έχουν ενεργό λογαριασμό.',
     });
   });
   it('reports outages and authentication failures without rendering raw server errors', async () => {

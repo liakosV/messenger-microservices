@@ -19,16 +19,15 @@ export function NewConversationModal({ token, callerUuid, close, onCreated, onEr
   return (
     <Modal title="Μια καινούρια κουβέντα" close={close}>
       <p className="muted">
-        Ζήτησε το UUID του άλλου χρήστη από το προφίλ του. Για ομάδα, πρόσθεσε περισσότερα UUID.
+        Γράψε το όνομα χρήστη του άλλου μέλους. Για ομάδα, πρόσθεσε περισσότερα ονόματα.
       </p>
       <form onSubmit={create}>
         <label>
-          UUID συμμετεχόντων
+          Ονόματα χρήστη συμμετεχόντων
           <textarea
-            className="uuid-input"
             value={newIds}
             onChange={(event) => setNewIds(event.target.value)}
-            placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+            placeholder="π.χ. alex, maria"
             rows={4}
             required
           />

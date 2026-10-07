@@ -6,6 +6,7 @@ import com.project.messenger.identity.core.exception.AppObjectUnauthorizedExcept
 import com.project.messenger.identity.dto.user.UserInsertDTO;
 import com.project.messenger.identity.dto.user.UserReadDTO;
 import com.project.messenger.identity.dto.user.UserUpdateDTO;
+import com.project.messenger.identity.dto.user.UsernameReadDTO;
 import com.project.messenger.identity.dto.user.ParticipantValidationResponse;
 import com.project.messenger.identity.mapper.UserMapper;
 import com.project.messenger.identity.model.User;
@@ -27,6 +28,17 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+
+    @Transactional(readOnly = true)
+    public List<UsernameReadDTO> resolveUsernames(UUID caller, List<String> usernames) {
+        findActiveUser(caller);
+        // Use the same database equality/collation as registration uniqueness and login.
+        return usernames.stream().distinct().map(username -> {
+            User user = userRepository.findByUsernameAndDeletedFalse(username)
+                    .orElseThrow(() -> new AppObjectNotFoundException("User", "User not found"));
+            return new UsernameReadDTO(user.getUuid(), user.getUsername());
+        }).distinct().toList();
+    }
 
     @Transactional(readOnly = true)
     public ParticipantValidationResponse validateParticipants(UUID caller, Set<UUID> userUuids) {

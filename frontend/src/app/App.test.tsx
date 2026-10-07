@@ -61,6 +61,7 @@ it('logs in, creates a conversation, sends and edits a message using the real AP
       calls.push({ path, options });
       if (path.endsWith('/login')) return reply({ accessToken: 'token', expiresIn: 900 });
       if (path.endsWith('/me')) return reply(profile);
+      if (path.endsWith('/resolve-usernames')) return reply([{ uuid: other, username: 'maria' }]);
       if (path.endsWith('/conversations') && options.method === 'POST') return reply(conversation);
       if (path.includes('/messages?page')) return reply(page([]));
       if (path.includes('/messages') && ['POST', 'PATCH'].includes(options.method!))
@@ -84,7 +85,7 @@ it('logs in, creates a conversation, sends and edits a message using the real AP
   await user.click(screen.getByRole('button', { name: 'Πάμε στις συνομιλίες' }));
   await screen.findByText('Συνομιλίες');
   await user.click(screen.getAllByRole('button', { name: 'Νέα συνομιλία' })[0]);
-  await user.type(screen.getByLabelText('UUID συμμετεχόντων'), other);
+  await user.type(screen.getByLabelText('Ονόματα χρήστη συμμετεχόντων'), 'maria');
   await user.click(screen.getByRole('button', { name: 'Ξεκίνα τη συνομιλία' }));
   await waitFor(() => expect(screen.getByLabelText('Μήνυμα').hasAttribute('disabled')).toBe(false));
   await user.type(screen.getByLabelText('Μήνυμα'), 'Γεια σου!');
@@ -124,6 +125,7 @@ it('loads the latest message page, applies WebSocket changes, and requires confi
     vi.fn(async (path: string, options: RequestInit) => {
       calls.push({ path, method: options.method });
       if (path.endsWith('/me')) return reply(profile);
+      if (path.endsWith('/resolve-usernames')) return reply([{ uuid: other, username: 'maria' }]);
       if (options.method === 'DELETE') return new Response(null, { status: 204 });
       if (path.includes('/messages?page=0')) return reply({ ...page([]), totalPages: 3 });
       if (path.includes('/messages?page=2'))
@@ -174,9 +176,9 @@ it('keeps the new-conversation dialog open when identity rejects a participant',
   const user = userEvent.setup();
   render(<App />);
   await user.click((await screen.findAllByRole('button', { name: 'Νέα συνομιλία' }))[0]);
-  await user.type(screen.getByLabelText('UUID συμμετεχόντων'), other);
+  await user.type(screen.getByLabelText('Ονόματα χρήστη συμμετεχόντων'), 'maria');
   await user.click(screen.getByRole('button', { name: 'Ξεκίνα τη συνομιλία' }));
-  await screen.findByText('Ένα ή περισσότερα UUID δεν ανήκουν σε ενεργούς χρήστες.');
+  await screen.findByText('Ένας ή περισσότεροι συμμετέχοντες δεν έχουν ενεργό λογαριασμό.');
   expect(screen.getByRole('dialog')).toBeDefined();
 });
 it('sends only changed profile fields in PATCH and leaves a blank password out', async () => {

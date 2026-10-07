@@ -1,5 +1,17 @@
 # Registration, login και JWT
 
+## Επίλυση usernames για συνομιλίες
+
+Το `POST /api/users/resolve-usernames` απαιτεί bearer JWT και ενεργό λογαριασμό.
+Δέχεται `{"usernames":["alice","bob"]}` με 1–99 ονόματα και επιστρέφει μόνο
+`[{"uuid":"…","username":"alice"},…]`, με `Cache-Control: no-store`.
+Κενά/μη έγκυρα ονόματα απορρίπτονται με 400, άγνωστοι ή απενεργοποιημένοι
+χρήστες με 404, χωρίς μερική απάντηση. Δεν επιστρέφονται email, τηλέφωνο ή ημερομηνία γέννησης.
+Η σύγκριση ακολουθεί το collation της στήλης `users.username`, όπως η υπάρχουσα
+μοναδικότητα και το login· ο κώδικας δεν μετατρέπει τα ονόματα σε πεζά.
+Το schema και το Docker init δεν ορίζουν explicit collation. Σε υπάρχουσα βάση
+ελέγχεται με `SHOW FULL COLUMNS FROM users LIKE 'username'`.
+
 ## Swagger UI
 
 Με την υπηρεσία σε λειτουργία, άνοιξε [Swagger UI](http://localhost:8082/swagger-ui/index.html).
