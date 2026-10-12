@@ -1,0 +1,10 @@
+liakos-messenger.duckdns.org {
+    handle /_demo/activity {
+        rewrite * /
+        reverse_proxy demo-activity:8080
+    }
+
+    handle {
+        reverse_proxy frontend:80
+    }
+}

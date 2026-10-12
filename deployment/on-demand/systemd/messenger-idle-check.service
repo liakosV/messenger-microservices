@@ -1,0 +1,8 @@
+[Unit]
+Description=Check Messenger demo inactivity
+After=docker.service
+
+[Service]
+Type=oneshot
+Environment=DRY_RUN=1
+ExecStart=/usr/bin/python3 /usr/local/sbin/messenger-idle-check.py

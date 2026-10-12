@@ -1,0 +1,18 @@
+services:
+  demo-activity:
+    image: python:3.12-slim
+    user: "${DEMO_UID:-1000}:${DEMO_GID:-1000}"
+    restart: unless-stopped
+    command: ["python", "/app/activity.py"]
+    volumes:
+      - ./docker/demo-idle/activity.py:/app/activity.py:ro
+      - /home/ubuntu/messenger-idle:/state
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      options:
+        max-size: "5m"
+        max-file: "2"

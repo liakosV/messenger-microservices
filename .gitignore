@@ -23,3 +23,6 @@
 .DS_Store
 Thumbs.db
 **/HELP.md
+
+# Temporary deployment archive
+messenger-deploy.tar.gz

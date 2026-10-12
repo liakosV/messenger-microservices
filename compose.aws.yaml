@@ -1,0 +1,88 @@
+name: messenger-aws
+
+services:
+  mysql:
+    image: mysql:8.4.6-oraclelinux9
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Missing MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: messenger_admin
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Missing DB_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - 'MYSQL_PWD="$${MYSQL_ROOT_PASSWORD}" mysql --protocol=TCP -h 127.0.0.1 -u root -e "SELECT 1"'
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  identity-service:
+    build:
+      context: ./identity-service
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/identity_db
+      DB_USERNAME: messenger_admin
+      DB_PASSWORD: ${DB_PASSWORD:?Missing DB_PASSWORD}
+      IDENTITY_JWT_PRIVATE_KEY: file:/app/keys/private.pem
+      IDENTITY_JWT_PUBLIC_KEY: file:/app/keys/public.pem
+      IDENTITY_JWT_ISSUER: messenger-identity
+      JAVA_TOOL_OPTIONS: "-Xms128m -Xmx512m"
+    volumes:
+      - ${MESSENGER_KEYS_DIR:?Missing MESSENGER_KEYS_DIR}/private.pem:/app/keys/private.pem:ro
+      - ${MESSENGER_KEYS_DIR:?Missing MESSENGER_KEYS_DIR}/public.pem:/app/keys/public.pem:ro
+    depends_on:
+      mysql:
+        condition: service_healthy
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  chat-service:
+    build:
+      context: ./chat-service
+    restart: unless-stopped
+    environment:
+      CHAT_DB_URL: jdbc:mysql://mysql:3306/chat_db
+      DB_USERNAME: messenger_admin
+      DB_PASSWORD: ${DB_PASSWORD:?Missing DB_PASSWORD}
+      CHAT_JWT_PUBLIC_KEY: file:/app/keys/public.pem
+      IDENTITY_JWT_ISSUER: messenger-identity
+      IDENTITY_BASE_URL: http://identity-service:8082
+      CHAT_ALLOWED_ORIGINS: http://localhost:5173
+      JAVA_TOOL_OPTIONS: "-Xms128m -Xmx512m"
+    volumes:
+      - ${MESSENGER_KEYS_DIR:?Missing MESSENGER_KEYS_DIR}/public.pem:/app/keys/public.pem:ro
+    depends_on:
+      mysql:
+        condition: service_healthy
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  frontend:
+    build:
+      context: ./frontend
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5173:80"
+    depends_on:
+      - identity-service
+      - chat-service
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  mysql_data:

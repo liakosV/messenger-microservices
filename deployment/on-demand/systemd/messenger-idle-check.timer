@@ -1,0 +1,11 @@
+[Unit]
+Description=Check Messenger demo inactivity every 30 seconds
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=30s
+AccuracySec=1s
+Unit=messenger-idle-check.service
+
+[Install]
+WantedBy=timers.target

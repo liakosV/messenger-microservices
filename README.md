@@ -12,6 +12,16 @@ This project explores the transition from a [Spring Boot monolith](https://githu
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)
 ![MySQL](https://img.shields.io/badge/Database-MySQL-4479A1?logo=mysql&logoColor=white)
 
+## Live demo
+
+**[Launch live demo](https://liakosv.github.io/portfolio/demo.html)** — starts the AWS EC2 instance on demand and opens Messenger when HTTPS is ready. A cold start may take a few minutes. The server stops after approximately 15 minutes without visitor interaction.
+
+Already running? [Open Messenger directly](https://liakos-messenger.duckdns.org). The direct URL cannot start a stopped server.
+
+Register two test accounts in separate browser sessions, copy their UUIDs from their profiles, and create a conversation. Send, edit, and delete messages to see WebSocket updates without refreshing the other session. The interface is in Greek; there are no shared demo credentials.
+
+Use test data rather than personal information. Launch it through the portfolio if the direct URL is unavailable.
+
 ## Features
 
 - **Accounts:** registration, login with username/email/phone, BCrypt password hashing, RS256 JWT access tokens, profile editing and password-confirmed account deactivation.
@@ -51,7 +61,7 @@ The backend follows controller → service → repository layers, with DTOs and 
 - A running **MySQL 8** server with permission to create two databases.
 - **PowerShell 7** for the Windows examples below. On macOS/Linux, use `./gradlew` and shell environment exports instead of `gradlew.bat` and `$env:`.
 
-Docker support is planned; the current setup runs the two backends and frontend separately.
+The steps below run the backends and frontend separately for development. Dockerfiles and Compose configurations are also included; see [AWS deployment](#aws-deployment) for the hosted setup. The root `compose.yaml` is a Windows-specific local configuration with an absolute key path and prebuilt backend images.
 
 ```powershell
 git clone https://github.com/liakosV/messenger-microservices.git
@@ -183,12 +193,76 @@ npm.cmd run build
 
 Backend tests cover service rules, HTTP authorization, JWT validation, identity verification and WebSocket behavior. Frontend tests exercise account/chat flows, API contracts and socket lifecycle; proxy tests use local HTTP/WebSocket fixtures. `npm.cmd run build` checks TypeScript and creates `frontend/dist`.
 
+## AWS deployment
+
+The portfolio demo runs on one Ubuntu 24.04 EC2 instance. Identity and chat remain separate containers and own separate schemas on the same MySQL instance. This is a single-host deployment, with no high availability or automatic scaling.
+
+```mermaid
+flowchart LR
+    B[Browser] -->|HTTPS| C[Caddy]
+    subgraph EC2["AWS EC2 · Docker Compose"]
+        C --> N[Nginx + React]
+        N -->|Identity API| I[Identity service]
+        N -->|Chat API / WebSocket| H[Chat service]
+        H -->|Account verification| I
+        I --> D[(MySQL · identity_db / chat_db)]
+        H --> D
+    end
+```
+
+| File | Purpose |
+| --- | --- |
+| `compose.aws.yaml` | Builds application images, runs MySQL, mounts external RSA keys, and persists database data |
+| `compose.https.yaml` | Adds Caddy on ports 80/443 and permits the public WebSocket origin |
+| `compose.idle.yaml` | Adds the internal activity receiver and its host timestamp directory |
+| `Caddyfile` | Routes the demo hostname to the frontend and enables automatic HTTPS |
+| `deployment/on-demand/` | Lambda source, IAM policy, idle checker, systemd units, and operations guide |
+
+Only Caddy publishes ports to the internet. Frontend port 5173 is bound to server loopback for an optional SSH tunnel. MySQL and the backends have no published host ports. Identity receives the private and public RSA keys; chat receives only the public key. Database and certificate data use named Docker volumes.
+
+### Build and start
+
+Before building the images, run `bootJar` in both backend modules using JDK 21. Their Dockerfiles copy the resulting `build/libs/*-0.0.1-SNAPSHOT.jar` files, so these must be included when transferring the project to the server. The frontend Dockerfile builds React during the Docker build.
+
+On the server, provide a private `.env` file with:
+
+```dotenv
+DB_PASSWORD=<generated-application-database-password>
+MYSQL_ROOT_PASSWORD=<different-generated-root-password>
+MESSENGER_KEYS_DIR=/home/ubuntu/messenger-keys
+```
+
+Replace the placeholders with generated secrets. Generate an RSA key pair outside the repository as `private.pem` and `public.pem` in the configured directory. Restrict `.env` and the private key to the server user. The application database user is `messenger_admin`, matching the initialization SQL.
+
+Point the hostname's DNS A record to the current EC2 public IPv4 address. For another hostname, update `Caddyfile`, `CHAT_ALLOWED_ORIGINS` in `compose.https.yaml`, and the activity receiver's allowed origins. Allow inbound TCP 80/443 and restrict SSH port 22 to the administrator's IP. Prepare the activity state directory and shutdown mechanism using the [on-demand deployment guide](deployment/on-demand/README.md).
+
+From the uploaded project directory on the server:
+
+```bash
+sudo docker compose --env-file .env -f compose.aws.yaml -f compose.https.yaml -f compose.idle.yaml config --quiet
+sudo docker compose --env-file .env -f compose.aws.yaml -f compose.https.yaml -f compose.idle.yaml build
+sudo docker compose --env-file .env -f compose.aws.yaml -f compose.https.yaml -f compose.idle.yaml up -d
+sudo docker compose --env-file .env -f compose.aws.yaml -f compose.https.yaml -f compose.idle.yaml ps
+```
+
+Use all three Compose files for subsequent updates. Pause the idle timer during maintenance. Rebuild the backend jars when backend code changes, transfer the updated files, and repeat the build/start commands. MySQL initialization scripts run only when its data volume is empty; Flyway handles application schema migrations.
+
+### Verification and data recovery
+
+The deployment was manually checked through the public HTTPS URL for authentication and live chat. A SQL backup of both databases was downloaded off the server and restored into an isolated MySQL container; the restored tables and record counts were checked. These are manual checks, not automated deployment tests or scheduled backups.
+
+Keep SQL backups, credentials, private keys, and deployment archives outside Git. A persistent volume is not a backup. **Do not use `docker compose down -v` on the deployed stack:** it removes database and certificate volumes.
+
+The portfolio launcher calls a Lambda to start EC2, update DuckDNS to its current public IP, and check frontend HTTPS readiness. A systemd timer stops the host after 15 minutes without interaction; background polling does not count as activity. Startup, idle Stop, and subsequent restart/login were manually verified. See the [operations guide](deployment/on-demand/README.md) for setup, dry-run testing, maintenance, and limitations.
+
+The public startup endpoint and activity signals have no authentication or abuse quota. CORS does not prevent direct API calls, and idle shutdown is not a spending cap. Retained storage still incurs costs while stopped. Update the SSH security-group rule if the administrator's IP changes; a manual EC2 start without invoking Lambda may require a manual DNS update.
+
 ## Current scope and next steps
 
 - Access tokens expire after 15 minutes by default; there is no refresh-token flow.
 - Unread counters are session-local indicators, not persistent read receipts.
 - Message events are live; conversation changes are refreshed by polling, manual refresh or returning to the tab.
 - No attachments, public user search, roles/admin panel, JWKS discovery or service discovery are implemented.
-- **Next:** Dockerfiles and Docker Compose for repeatable local startup.
+- Potential improvements include automated deployment, scheduled off-host backups, health monitoring, and refresh tokens.
 
-For a hosted deployment, serve the frontend build behind an HTTPS reverse proxy with REST routing and WebSocket upgrades, configure the actual allowed origin, and supply database credentials and RSA keys externally. Vite preview is intended for local build verification.
+The hosted demo serves the frontend through Nginx behind Caddy, with REST routing and WebSocket upgrades. Vite preview is intended for local build verification.
