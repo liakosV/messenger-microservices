@@ -1,5 +1,5 @@
 import { DateOfBirthField } from '../../../shared/components/DateOfBirthField';
-import { PhoneField } from '../../../shared/components/PhoneField';
+import { CountryPhoneField } from '../../../shared/components/CountryPhoneField';
 import type { Profile } from '../model/types';
 import { Avatar } from '../../../shared/components/Avatar';
 import { CopyId } from '../../../shared/components/CopyId';
@@ -69,7 +69,7 @@ export function ProfileModal({ profile, token, close, updated, logout, onError }
             </label>
             <div className="form-row">
               <DateOfBirthField calendar defaultValue={profile.dateOfBirth} />
-              <PhoneField defaultValue={profile.phoneNumber} />
+              <CountryPhoneField defaultValue={profile.phoneNumber} />
             </div>
             <label>
               Νέος κωδικός <span className="muted">· προαιρετικό</span>

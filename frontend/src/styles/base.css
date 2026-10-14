@@ -412,3 +412,135 @@ form > .form-row {
 .birth-date > .birth-calendar {
   margin-top: 0;
 }
+.registration-phone {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.registration-phone legend {
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 7px;
+}
+.phone-country-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  padding: 12px 14px;
+  border: 1px solid #dce3db;
+  border-radius: 10px;
+  background: white;
+  font-size: 12px;
+  text-align: left;
+}
+.phone-country-trigger > span:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+}
+.phone-country-trigger strong {
+  white-space: nowrap;
+  color: var(--green);
+}
+.phone-country-panel {
+  margin-top: 7px;
+  padding: 12px;
+  border: 1px solid #dce3db;
+  border-radius: 12px;
+  background: #f8faf3;
+}
+.phone-country-panel select {
+  width: 100%;
+  max-width: 100%;
+  margin-top: 7px;
+  border: 1px solid #dce3db;
+  border-radius: 8px;
+  background: white;
+  color: #263b31;
+  font: inherit;
+}
+.phone-country-panel option {
+  padding: 9px 8px;
+}
+.phone-country-panel select:focus-visible {
+  outline: 2px solid #94b6a1;
+}
+.phone-country-panel label + label {
+  margin-top: 10px;
+}
+.phone-number-label {
+  margin-top: 9px;
+}
+.country-flag {
+  width: 24px;
+  height: 16px;
+  object-fit: cover;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px #243c321a;
+  flex-shrink: 0;
+}
+.phone-entry-row {
+  display: flex;
+  align-items: stretch;
+  gap: 7px;
+}
+.phone-entry-row .phone-country-trigger {
+  flex: 0 0 auto;
+  width: auto;
+  padding: 10px;
+  gap: 7px;
+}
+.phone-entry-row .phone-number-label {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+.phone-entry-row input {
+  margin: 0;
+  height: 100%;
+}
+.phone-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.phone-country-options {
+  margin-top: 10px;
+  max-height: 240px;
+  overflow-y: auto;
+  border: 1px solid #dce3db;
+  border-radius: 8px;
+  background: white;
+}
+.phone-country-options button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  padding: 9px;
+  text-align: left;
+  background: white;
+  font-size: 12px;
+}
+.phone-country-options button span {
+  flex: 1;
+}
+.phone-country-options button strong {
+  white-space: nowrap;
+  color: var(--green);
+}
+.phone-country-options button[aria-selected='true'],
+.phone-country-options button:hover {
+  background: var(--lime);
+}
+.phone-country-options button:focus-visible {
+  outline-offset: -3px;
+}

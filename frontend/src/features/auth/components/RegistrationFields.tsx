@@ -1,5 +1,5 @@
 import { DateOfBirthField } from '../../../shared/components/DateOfBirthField';
-import { PhoneField } from '../../../shared/components/PhoneField';
+import { RegistrationPhoneField } from './RegistrationPhoneField';
 export function RegistrationFields() {
   return (
     <>
@@ -28,7 +28,7 @@ export function RegistrationFields() {
       </label>
       <div className="form-row">
         <DateOfBirthField calendar />
-        <PhoneField />
+        <RegistrationPhoneField />
       </div>
     </>
   );
