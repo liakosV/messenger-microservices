@@ -544,3 +544,23 @@ form > .form-row {
 .phone-country-options button:focus-visible {
   outline-offset: -3px;
 }
+.login-fields {
+  margin-bottom: 17px;
+}
+.login-methods {
+  display: flex;
+  gap: 7px;
+  margin-bottom: 14px;
+}
+.login-methods button {
+  flex: 1;
+  min-height: 40px;
+  padding: 8px;
+  border-radius: 9px;
+  background: #eef1eb;
+  font-size: 12px;
+}
+.login-methods button[aria-pressed='true'] {
+  background: var(--green);
+  color: white;
+}

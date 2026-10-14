@@ -2,6 +2,7 @@ import { RegistrationFields } from './RegistrationFields';
 import { AuthStory } from './AuthStory';
 import { ArrowRight } from 'lucide-react';
 import { useAuthForm } from '../hooks/useAuthForm';
+import { LoginFields } from './LoginFields';
 export function AuthScreen({ signedIn }: { signedIn: (token: string, expiresIn: number) => void }) {
   const { register, busy, error, success, submit, switchMode } = useAuthForm(signedIn);
   return (
@@ -33,20 +34,7 @@ export function AuthScreen({ signedIn }: { signedIn: (token: string, expiresIn: 
             </button>
           </div>
           <form key={String(register)} onSubmit={submit}>
-            {register ? (
-              <RegistrationFields />
-            ) : (
-              <label>
-                Όνομα χρήστη, email ή τηλέφωνο
-                <input
-                  name="identifier"
-                  autoComplete="username"
-                  placeholder="Πώς σε βρίσκουμε;"
-                  maxLength={255}
-                  required
-                />
-              </label>
-            )}
+            {register ? <RegistrationFields /> : <LoginFields />}
             <label>
               Κωδικός
               <input
