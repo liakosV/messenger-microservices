@@ -1,3 +1,4 @@
+import { useParticipantNames } from '../hooks/useParticipantNames';
 import { ConversationListItem } from './ConversationListItem';
 import { ChevronDown, ChevronRight, MessageCircle, Plus, RefreshCw, Search } from 'lucide-react';
 import type { Profile } from '../../profile/model/types';
@@ -39,8 +40,9 @@ export function ConversationSidebar({
   onLoadMore,
   onProfile,
 }: Props) {
+  const { names } = useParticipantNames();
   const visible = conversations.filter((item) =>
-    [titleFor(item, profile), item.uuid, item.participantUuids.join(' ')]
+    [titleFor(item, profile, names), item.uuid, item.participantUuids.join(' ')]
       .join(' ')
       .toLowerCase()
       .includes(search.toLowerCase()),

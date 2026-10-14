@@ -30,6 +30,15 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
+    public List<UsernameReadDTO> resolveUserIds(UUID caller, Set<UUID> userUuids) {
+        findActiveUser(caller);
+        return userRepository.findAllByUuidIn(userUuids).stream()
+                .filter(user -> !user.isDeleted())
+                .map(user -> new UsernameReadDTO(user.getUuid(), user.getUsername()))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public List<UsernameReadDTO> resolveUsernames(UUID caller, List<String> usernames) {
         findActiveUser(caller);
         // Use the same database equality/collation as registration uniqueness and login.

@@ -1,8 +1,9 @@
+import { useParticipantNames } from '../hooks/useParticipantNames';
 import { ArrowLeft, LogOut, MoreHorizontal, RefreshCw, Trash2, Users } from 'lucide-react';
 import { useState } from 'react';
 import type { Profile } from '../../profile/model/types';
 import type { Conversation } from '../model/types';
-import { shortId } from '../../../shared/utils/format';
+
 import { titleFor } from '../model/conversations';
 import { Avatar } from '../../../shared/components/Avatar';
 interface Props {
@@ -23,6 +24,7 @@ export function ChatHeader({
   onLeave,
   onDelete,
 }: Props) {
+  const { names } = useParticipantNames();
   const [menu, setMenu] = useState(false);
   return (
     <header className="chat-header">
@@ -34,14 +36,10 @@ export function ChatHeader({
         <ArrowLeft size={20} />
       </button>
       <Avatar
-        label={
-          selected.participantUuids.length > 2
-            ? 'ΟΜ'
-            : shortId(selected.participantUuids.find((id) => id !== profile.uuid) || selected.uuid)
-        }
+        label={selected.participantUuids.length > 2 ? 'ΟΜ' : titleFor(selected, profile, names)}
       />
       <div className="chat-heading">
-        <h2>{titleFor(selected, profile)}</h2>
+        <h2>{titleFor(selected, profile, names)}</h2>
         <span>{selected.participantUuids.length} συμμετέχοντες</span>
       </div>
       <button className="icon-button" aria-label="Συμμετέχοντες" onClick={onMembers}>

@@ -273,6 +273,52 @@ class UserControllerTest {
         verify(repository, never()).findByUsernameAndDeletedFalse("alice");
     }
 
+    @Test
+    void idResolutionUsesOneBatchAndReturnsOnlyActivePublicNames() throws Exception {
+        UUID missing = UUID.randomUUID();
+        User deleted = new User();
+        deleted.setUuid(UUID.randomUUID());
+        deleted.setUsername("deleted-user");
+        deleted.setDeleted(true);
+        var ids = java.util.Set.of(user.getUuid(), deleted.getUuid(), missing);
+        when(repository.findAllByUuidIn(ids)).thenReturn(java.util.List.of(user, deleted));
+        String body = "{\"userUuids\":[\"" + user.getUuid() + "\",\"" + deleted.getUuid() + "\",\"" + missing + "\"]}";
+        mvc.perform(post("/api/users/resolve-ids").header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].uuid").value(user.getUuid().toString()))
+                .andExpect(jsonPath("$[0].username").value("alice"))
+                .andExpect(jsonPath("$[0].length()").value(2))
+                .andExpect(jsonPath("$[0].email").doesNotExist())
+                .andExpect(jsonPath("$[0].phoneNumber").doesNotExist())
+                .andExpect(jsonPath("$[0].password").doesNotExist())
+                .andExpect(header().string("Cache-Control", "no-store"));
+        verify(repository, times(1)).findAllByUuidIn(ids);
+    }
+
+    @Test
+    void idResolutionRequiresActiveAuthenticationAndBoundedValidIds() throws Exception {
+        String body = "{\"userUuids\":[\"" + user.getUuid() + "\"]}";
+        mvc.perform(post("/api/users/resolve-ids").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isUnauthorized());
+        for (String invalid : new String[]{"{}", "{\"userUuids\":[]}", "{\"userUuids\":[null]}", "{\"userUuids\":[\"invalid\"]}"}) {
+            mvc.perform(post("/api/users/resolve-ids").header("Authorization", "Bearer " + token)
+                            .contentType(MediaType.APPLICATION_JSON).content(invalid))
+                    .andExpect(status().isBadRequest());
+        }
+        String oversized = java.util.stream.IntStream.range(0, 101)
+                .mapToObj(index -> "\"" + UUID.randomUUID() + "\"")
+                .collect(java.util.stream.Collectors.joining(",", "{\"userUuids\":[", "]}"));
+        mvc.perform(post("/api/users/resolve-ids").header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON).content(oversized))
+                .andExpect(status().isBadRequest());
+        user.setDeleted(true);
+        mvc.perform(post("/api/users/resolve-ids").header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isNotFound());
+        verify(repository, never()).findAllByUuidIn(any());
+    }
+
     @Configuration
     @EnableWebMvc
     @EnableWebSecurity

@@ -1,11 +1,18 @@
 import type { Profile } from '../../profile/model/types';
 import type { Conversation } from './types';
 import { shortId } from '../../../shared/utils/format';
-export function titleFor(conversation: Conversation, me: Profile) {
+export function participantLabel(uuid: string, names: Record<string, string> = {}) {
+  return names[uuid] || `Χρήστης ${shortId(uuid)}`;
+}
+export function titleFor(
+  conversation: Conversation,
+  me: Profile,
+  names: Record<string, string> = {},
+) {
   const others = conversation.participantUuids.filter((id) => id !== me.uuid);
   return others.length > 1
     ? `Ομάδα · ${conversation.participantUuids.length} μέλη`
-    : `Χρήστης ${shortId(others[0] || conversation.uuid)}`;
+    : participantLabel(others[0] || conversation.uuid, names);
 }
 export const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export function participantIds(text: string, me: string): string[] {

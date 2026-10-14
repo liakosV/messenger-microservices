@@ -5,6 +5,7 @@ import com.project.messenger.identity.dto.user.UserReadDTO;
 import com.project.messenger.identity.dto.user.UserUpdateDTO;
 import com.project.messenger.identity.dto.user.UsernameReadDTO;
 import com.project.messenger.identity.dto.user.UsernameResolutionRequest;
+import com.project.messenger.identity.dto.user.UserIdResolutionRequest;
 import com.project.messenger.identity.service.UserService;
 import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -31,6 +32,14 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+
+    @PostMapping("/resolve-ids")
+    public ResponseEntity<List<UsernameReadDTO>> resolveUserIds(
+            @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody UserIdResolutionRequest request) {
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore())
+                .body(userService.resolveUserIds(UUID.fromString(jwt.getSubject()), request.userUuids()));
+    }
 
     @PostMapping("/resolve-usernames")
     public ResponseEntity<List<UsernameReadDTO>> resolveUsernames(

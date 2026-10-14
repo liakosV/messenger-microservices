@@ -1,5 +1,7 @@
 import { Check, Pencil, Trash2 } from 'lucide-react';
-import { shortId, time } from '../../../shared/utils/format';
+import { time } from '../../../shared/utils/format';
+import { useParticipantNames } from '../hooks/useParticipantNames';
+import { participantLabel } from '../model/conversations';
 import type { Message } from '../model/types';
 interface Props {
   message: Message;
@@ -8,10 +10,11 @@ interface Props {
   onDelete: (message: Message) => void;
 }
 export function MessageBubble({ message, mine, onEdit, onDelete }: Props) {
+  const { names } = useParticipantNames();
   return (
     <article className={`message-row ${mine ? 'mine' : ''}`}>
       <div className="message-content">
-        {!mine && <span className="sender">Χρήστης {shortId(message.senderUuid)}</span>}
+        {!mine && <span className="sender">{participantLabel(message.senderUuid, names)}</span>}
         <div className="bubble">
           <p>{message.content}</p>
           <div className="message-meta">

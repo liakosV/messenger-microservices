@@ -218,3 +218,45 @@ it('expires a rejected session rather than displaying protected content', async 
   await screen.findByRole('button', { name: 'Πάμε στις συνομιλίες' });
   expect(sessionStorage.getItem('messenger.session')).toBeNull();
 });
+
+it('shows resolved usernames in the conversation, participants and incoming message labels', async () => {
+  sessionStorage.setItem(
+    'messenger.session',
+    JSON.stringify({ token: 'token', expiresAt: Date.now() + 60000 }),
+  );
+  const fetcher = vi.fn(async (path: string, options: RequestInit) => {
+    if (path.endsWith('/me')) return reply(profile);
+    if (path.endsWith('/resolve-ids')) return reply([{ uuid: other, username: 'maria' }]);
+    if (path.includes('/messages?page'))
+      return reply(
+        page([
+          {
+            uuid: 'incoming',
+            conversationUuid: conversation.uuid,
+            senderUuid: other,
+            content: 'Γεια!',
+            createdAt: conversation.createdAt,
+            updatedAt: conversation.updatedAt,
+          },
+        ]),
+      );
+    if (path.includes('/conversations?page')) return reply(page([conversation]));
+    if (path.endsWith(`/conversations/${conversation.uuid}`)) return reply(conversation);
+    throw new Error(`Unexpected request: ${path} ${options.method}`);
+  });
+  vi.stubGlobal('fetch', fetcher);
+  const user = userEvent.setup();
+  render(<App />);
+  const row = await screen.findByRole('button', { name: /maria/ });
+  await user.click(row);
+  await screen.findByRole('heading', { name: 'maria' });
+  await within(screen.getByLabelText('Ιστορικό μηνυμάτων')).findByText('maria');
+  await user.click(screen.getByRole('button', { name: 'Συμμετέχοντες' }));
+  const dialog = screen.getByRole('dialog');
+  expect(within(dialog).getByText('maria')).toBeTruthy();
+  expect(within(dialog).getByText('alex · εσύ')).toBeTruthy();
+  expect(within(dialog).queryByText(`Χρήστης ${other.slice(0, 8)}`)).toBeNull();
+  const batches = fetcher.mock.calls.filter((call) => call[0].endsWith('/resolve-ids'));
+  expect(batches).toHaveLength(1);
+  expect(JSON.parse(String(batches[0][1].body))).toEqual({ userUuids: [other] });
+});

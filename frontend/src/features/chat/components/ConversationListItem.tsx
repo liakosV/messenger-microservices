@@ -1,6 +1,7 @@
+import { useParticipantNames } from '../hooks/useParticipantNames';
 import type { Profile } from '../../profile/model/types';
 import type { Conversation } from '../model/types';
-import { shortId } from '../../../shared/utils/format';
+
 import { titleFor } from '../model/conversations';
 import { Avatar } from '../../../shared/components/Avatar';
 interface Props {
@@ -19,22 +20,17 @@ export function ConversationListItem({
   unreadCount,
   onSelect,
 }: Props) {
+  const { names } = useParticipantNames();
   return (
     <button
       className={`conversation ${selectedId === item.uuid ? 'selected' : ''}`}
       key={item.uuid}
       onClick={() => onSelect(item.uuid)}
     >
-      <Avatar
-        label={
-          item.participantUuids.length > 2
-            ? 'ΟΜ'
-            : shortId(item.participantUuids.find((id) => id !== profile.uuid) || item.uuid)
-        }
-      />
+      <Avatar label={item.participantUuids.length > 2 ? 'ΟΜ' : titleFor(item, profile, names)} />
       <div className="conversation-text">
         <div>
-          <strong>{titleFor(item, profile)}</strong>
+          <strong>{titleFor(item, profile, names)}</strong>
           <span className="conversation-date">
             {new Date(item.createdAt).toLocaleDateString('el-GR', {
               day: '2-digit',

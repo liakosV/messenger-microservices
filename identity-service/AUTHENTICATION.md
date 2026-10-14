@@ -184,3 +184,12 @@ DELETE body:
 Το υπάρχον `IdentityServiceApplicationTests.contextLoads` απαιτεί τη βάση και τα πραγματικά εξωτερικά κλειδιά και δεν περιλαμβάνεται στους απομονωμένους ελέγχους. Η πρώτη πραγματική δοκιμή είναι: εκκίνηση με τη νέα βάση και το δικό σου ζεύγος κλειδιών, register, έλεγχος UUID/timestamps/hash στη βάση και login με καθεμία από τις τρεις μορφές identifier. Μην μοιραστείς password, private key ή πλήρες access token.
 
 Επίσημες αναφορές: [Spring Security JWT Resource Server](https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/jwt.html), [NimbusJwtEncoder](https://docs.spring.io/spring-security/site/docs/current/api/org/springframework/security/oauth2/jwt/NimbusJwtEncoder.html).
+
+## Επίλυση UUID σε ονόματα συμμετεχόντων
+
+Το `POST /api/users/resolve-ids` απαιτεί bearer JWT και ενεργό λογαριασμό.
+Δέχεται `{"userUuids":["…"]}` με 1–100 διακριτά, μη null UUID και επιστρέφει
+μόνο `[{"uuid":"…","username":"alice"},…]` με `Cache-Control: no-store`.
+Η ανάκτηση γίνεται με ένα μαζικό query. Ανύπαρκτοι ή απενεργοποιημένοι χρήστες
+παραλείπονται, ώστε να λειτουργεί και η εμφάνιση ιστορικών μηνυμάτων.
+Δεν επιστρέφονται email, τηλέφωνα, ημερομηνίες γέννησης ή credentials.
