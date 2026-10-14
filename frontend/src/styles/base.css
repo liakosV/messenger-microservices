@@ -285,3 +285,130 @@ form > .form-row {
   justify-content: center;
   gap: 25px;
 }
+.birth-calendar {
+  margin-top: 8px;
+}
+.birth-calendar-trigger {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 0;
+  background: transparent;
+  color: var(--green);
+  font-size: 11px;
+  text-align: left;
+}
+.birth-calendar-panel {
+  margin-top: 5px;
+  padding: 10px;
+  border: 1px solid #dce3db;
+  border-radius: 14px;
+  background: #f8faf3;
+  box-shadow: 0 5px 18px #235c430a;
+}
+.birth-calendar-heading {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) 58px 22px;
+  align-items: end;
+  gap: 4px;
+}
+.birth-calendar-heading label {
+  font-size: 9px;
+}
+.birth-calendar-heading select,
+.birth-calendar-heading input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  margin-top: 4px;
+  padding: 7px 3px;
+  border: 1px solid #dce3db;
+  border-radius: 7px;
+  color: var(--green);
+  background: white;
+  font: inherit;
+  font-size: 11px;
+}
+.birth-calendar-heading select:focus-visible {
+  outline: 2px solid #94b6a1;
+}
+.birth-calendar-heading button {
+  display: grid;
+  place-items: center;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border-radius: 7px;
+}
+.birth-calendar-help {
+  margin: 9px 0;
+  color: #668576;
+  font-size: 10px;
+}
+.birth-calendar-week,
+.birth-calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 2px;
+  text-align: center;
+}
+.birth-calendar-week {
+  margin-bottom: 5px;
+  font-size: 9px;
+  color: #668576;
+}
+.birth-calendar-days button {
+  min-width: 0;
+  min-height: 32px;
+  padding: 4px 0;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 11px;
+}
+.birth-calendar-days button:hover:not(:disabled) {
+  background: var(--lime);
+}
+.birth-calendar-days button[aria-pressed='true'] {
+  background: var(--green);
+  color: white;
+}
+.birth-calendar-days button:focus-visible {
+  outline-offset: 0;
+}
+.form-row:has(.birth-calendar) {
+  grid-template-columns: 1fr;
+}
+.birth-calendar-panel {
+  max-width: 360px;
+}
+.birth-calendar-heading {
+  grid-template-columns: 28px minmax(0, 1fr) 76px 28px;
+  gap: 7px;
+}
+.birth-calendar-days button {
+  min-height: 40px;
+  font-size: 12px;
+}
+.birth-calendar-field {
+  position: relative;
+}
+.birth-calendar-field > svg {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--green);
+  pointer-events: none;
+}
+.birth-calendar-field .birth-calendar-trigger {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 12px 42px 12px 14px;
+  background: white;
+  color: #263b31;
+  font-size: 13px;
+}
+.birth-date > .birth-calendar {
+  margin-top: 0;
+}

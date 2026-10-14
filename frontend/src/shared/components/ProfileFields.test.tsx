@@ -73,3 +73,87 @@ it('does not change an existing international phone on focus or blur', async () 
   await user.tab();
   expect(new FormData(container.querySelector('form')!).get('phoneNumber')).toBe('+44 7911 123456');
 });
+
+it('selects a leap day using the calendar keyboard and restores focus', async () => {
+  const user = userEvent.setup();
+  const { container } = render(
+    <form>
+      <DateOfBirthField calendar />
+    </form>,
+  );
+  const trigger = screen.getByRole('textbox', { name: 'Ημερομηνία γέννησης' });
+  await user.click(trigger);
+  await user.selectOptions(screen.getByLabelText('Μήνας ημερολογίου'), '1');
+  const year = screen.getByLabelText('Έτος ημερολογίου');
+  await user.selectOptions(year, '2000');
+  const day = screen.getByRole('button', { name: '28 Φεβρουαρίου 2000' });
+  day.focus();
+  await user.keyboard('{ArrowRight}{Enter}');
+  expect(new FormData(container.querySelector('form')!).get('dateOfBirth')).toBe('2000-02-29');
+  expect(container.querySelector('form')!.checkValidity()).toBe(true);
+  expect(document.activeElement).toBe(trigger);
+  expect(screen.queryByRole('region', { name: 'Ημερολόγιο γέννησης' })).toBeNull();
+  await user.click(trigger);
+  await user.keyboard('{Escape}');
+  expect(document.activeElement).toBe(trigger);
+});
+
+it('disables today and future days in the calendar', async () => {
+  const user = userEvent.setup();
+  render(<DateOfBirthField calendar />);
+  await user.click(screen.getByRole('textbox', { name: 'Ημερομηνία γέννησης' }));
+  const today = new Date();
+  await user.selectOptions(screen.getByLabelText('Μήνας ημερολογίου'), String(today.getMonth()));
+  await user.selectOptions(screen.getByLabelText('Έτος ημερολογίου'), String(today.getFullYear()));
+  const label = today.toLocaleDateString('el-GR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+  expect((screen.getByRole('button', { name: label }) as HTMLButtonElement).disabled).toBe(true);
+});
+
+it('shows one registration date field and blocks empty or impossible typed dates', async () => {
+  const user = userEvent.setup();
+  const { container } = render(
+    <form>
+      <DateOfBirthField calendar defaultValue="2000-02-29" />
+    </form>,
+  );
+  const field = screen.getByRole('textbox', { name: 'Ημερομηνία γέννησης' }) as HTMLInputElement;
+  const form = container.querySelector('form')!;
+  expect(field.value).toBe('29/02/2000');
+  expect(screen.queryByLabelText('Ημέρα')).toBeNull();
+  expect(screen.queryByLabelText('Μήνας')).toBeNull();
+  expect(screen.queryByLabelText('Έτος')).toBeNull();
+  await user.clear(field);
+  expect(form.checkValidity()).toBe(false);
+  await user.type(field, '29/02/2001');
+  expect(form.checkValidity()).toBe(false);
+  expect(new FormData(form).get('dateOfBirth')).toBe('');
+  await user.clear(field);
+  await user.type(field, '28/02/2001');
+  expect(form.checkValidity()).toBe(true);
+  expect(new FormData(form).get('dateOfBirth')).toBe('2001-02-28');
+  await user.keyboard('{Escape}{ArrowDown}');
+  expect(screen.getByRole('region', { name: 'Ημερολόγιο γέννησης' })).toBeTruthy();
+});
+
+it('selects distant birth years without a minimum age or a recent-year cutoff', async () => {
+  const user = userEvent.setup();
+  const { container } = render(
+    <form>
+      <DateOfBirthField calendar />
+    </form>,
+  );
+  await user.click(screen.getByRole('textbox', { name: 'Ημερομηνία γέννησης' }));
+  const year = screen.getByRole('combobox', { name: 'Έτος ημερολογίου' }) as HTMLSelectElement;
+  expect(year.options[0].value).toBe(String(new Date().getFullYear()));
+  expect(year.options[year.options.length - 1].value).toBe('1');
+  await user.selectOptions(year, '1900');
+  await user.selectOptions(screen.getByRole('combobox', { name: 'Μήνας ημερολογίου' }), '1');
+  expect(screen.queryByRole('button', { name: '29 Φεβρουαρίου 1900' })).toBeNull();
+  await user.click(screen.getByRole('button', { name: '28 Φεβρουαρίου 1900' }));
+  expect(new FormData(container.querySelector('form')!).get('dateOfBirth')).toBe('1900-02-28');
+  expect(container.querySelector('form')!.checkValidity()).toBe(true);
+});

@@ -68,7 +68,7 @@ export function ProfileModal({ profile, token, close, updated, logout, onError }
               />
             </label>
             <div className="form-row">
-              <DateOfBirthField defaultValue={profile.dateOfBirth} />
+              <DateOfBirthField calendar defaultValue={profile.dateOfBirth} />
               <PhoneField defaultValue={profile.phoneNumber} />
             </div>
             <label>

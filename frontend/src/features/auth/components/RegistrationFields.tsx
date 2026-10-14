@@ -27,7 +27,7 @@ export function RegistrationFields() {
         />
       </label>
       <div className="form-row">
-        <DateOfBirthField />
+        <DateOfBirthField calendar />
         <PhoneField />
       </div>
     </>

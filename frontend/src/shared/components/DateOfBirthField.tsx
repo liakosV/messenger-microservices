@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { BirthCalendar } from './BirthCalendar';
 
 export function birthDate(day: string, month: string, year: string, today = new Date()): string {
   if (!/^\d{1,2}$/.test(day) || !/^\d{1,2}$/.test(month) || !/^\d{4}$/.test(year)) return '';
@@ -20,7 +21,13 @@ export function birthDate(day: string, month: string, year: string, today = new 
   return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
 }
 
-export function DateOfBirthField({ defaultValue = '' }: { defaultValue?: string }) {
+export function DateOfBirthField({
+  defaultValue = '',
+  calendar = false,
+}: {
+  defaultValue?: string;
+  calendar?: boolean;
+}) {
   const initial = defaultValue.split('-');
   const [day, setDay] = useState(initial[2] || '');
   const [month, setMonth] = useState(initial[1] || '');
@@ -32,6 +39,22 @@ export function DateOfBirthField({ defaultValue = '' }: { defaultValue?: string 
       value ? '' : 'Συμπλήρωσε έγκυρη ημερομηνία γέννησης πριν από σήμερα.',
     );
   }, [value]);
+  if (calendar)
+    return (
+      <fieldset className="birth-date">
+        <legend>Ημερομηνία γέννησης</legend>
+        <BirthCalendar
+          value={value}
+          onSelect={(date) => {
+            const [y, m, d] = date.split('-');
+            setYear(y || '');
+            setMonth(m || '');
+            setDay(d || '');
+          }}
+        />
+        <input type="hidden" name="dateOfBirth" value={value} />
+      </fieldset>
+    );
   return (
     <fieldset className="birth-date">
       <legend>Ημερομηνία γέννησης</legend>
