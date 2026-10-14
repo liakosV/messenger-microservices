@@ -87,10 +87,14 @@ it('logs in, creates a conversation, sends and edits a message using the real AP
   await user.click(screen.getAllByRole('button', { name: 'Νέα συνομιλία' })[0]);
   await user.type(screen.getByLabelText('Ονόματα χρήστη συμμετεχόντων'), 'maria');
   await user.click(screen.getByRole('button', { name: 'Ξεκίνα τη συνομιλία' }));
-  await waitFor(() => expect(screen.getByLabelText('Μήνυμα').hasAttribute('disabled')).toBe(false));
+  await waitFor(() =>
+    expect((screen.getByLabelText('Μήνυμα') as HTMLTextAreaElement).readOnly).toBe(false),
+  );
+  expect(document.activeElement).toBe(screen.getByLabelText('Μήνυμα'));
   await user.type(screen.getByLabelText('Μήνυμα'), 'Γεια σου!');
   await user.click(screen.getByRole('button', { name: 'Αποστολή μηνύματος' }));
   await within(screen.getByLabelText('Ιστορικό μηνυμάτων')).findByText('Γεια σου!');
+  expect(document.activeElement).toBe(screen.getByLabelText('Μήνυμα'));
   await user.click(screen.getByRole('button', { name: 'Επεξεργασία μηνύματος' }));
   await user.clear(screen.getByLabelText('Μήνυμα'));
   await user.type(screen.getByLabelText('Μήνυμα'), 'Γεια ξανά!');
