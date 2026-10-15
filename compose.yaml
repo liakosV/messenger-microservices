@@ -1,6 +1,8 @@
 services:
   identity-service:
     image: identity-service:local
+    build:
+      context: ./identity-service
     ports:
       - "127.0.0.1:8082:8082"
     environment:
@@ -21,6 +23,8 @@ services:
 
   chat-service:
     image: chat-service:local
+    build:
+      context: ./chat-service
     ports:
       - "127.0.0.1:8083:8083"
     environment:
