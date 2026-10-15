@@ -23,7 +23,7 @@ export function LoginFields() {
         <RegistrationPhoneField name="identifier" />
       ) : (
         <label>
-          Όνομα χρήστη, email ή τηλέφωνο
+          Όνομα χρήστη ή email
           <input
             autoComplete="username"
             placeholder="Πώς σε βρίσκουμε;"

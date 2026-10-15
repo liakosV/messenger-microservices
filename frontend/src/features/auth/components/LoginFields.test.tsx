@@ -21,7 +21,7 @@ it.each(['alex', 'alex@example.com', '6912345678'])(
   'preserves the username/email identifier %s',
   async (identifier) => {
     const { user, login, signedIn } = setup();
-    await user.type(screen.getByLabelText('Όνομα χρήστη, email ή τηλέφωνο'), identifier);
+    await user.type(screen.getByLabelText('Όνομα χρήστη ή email'), identifier);
     await user.type(screen.getByLabelText('Κωδικός'), 'secret');
     await user.click(screen.getByRole('button', { name: 'Πάμε στις συνομιλίες' }));
     expect(login).toHaveBeenCalledWith({ identifier, password: 'secret' });
@@ -62,7 +62,7 @@ it('uses the selected country for a national number and blocks an empty phone', 
 
 it('still accepts a spaced international phone in the general identifier field', async () => {
   const { user, login } = setup();
-  await user.type(screen.getByLabelText('Όνομα χρήστη, email ή τηλέφωνο'), '+30 691 234 5678');
+  await user.type(screen.getByLabelText('Όνομα χρήστη ή email'), '+30 691 234 5678');
   await user.type(screen.getByLabelText('Κωδικός'), 'secret');
   await user.click(screen.getByRole('button', { name: 'Πάμε στις συνομιλίες' }));
   expect(login).toHaveBeenCalledWith({ identifier: '+306912345678', password: 'secret' });
