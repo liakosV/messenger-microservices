@@ -64,6 +64,11 @@ export function ConversationSidebar({
           <Plus size={21} />
         </button>
       </div>
+      {Object.values(unread).some((count) => count > 0) && (
+        <p className="unread-notice" role="status">
+          Έχεις {Object.values(unread).reduce((total, count) => total + count, 0)} αδιάβαστα μηνύματα
+        </p>
+      )}
       <label className="search">
         <Search size={17} />
         <input

@@ -29,7 +29,7 @@ export function connectChat(
           clearTimeout(handshake);
           retries = 0;
           onState('online');
-        } else if (['MESSAGE_CREATED', 'MESSAGE_UPDATED', 'MESSAGE_DELETED'].includes(data.type))
+        } else if (['MESSAGE_CREATED', 'MESSAGE_UPDATED', 'MESSAGE_DELETED', 'MESSAGE_RECEIPT'].includes(data.type))
           onEvent(data);
       } catch {
         /* Ignore malformed frames without rendering untrusted data. */

@@ -34,6 +34,8 @@ describe('authenticated WebSocket lifecycle', () => {
     expect(state).toHaveBeenLastCalledWith('online');
     socket.onmessage!({ data: '{"type":"MESSAGE_CREATED","conversationUuid":"one"}' });
     expect(event).toHaveBeenCalledOnce();
+    socket.onmessage!({ data: '{"type":"MESSAGE_RECEIPT","conversationUuid":"one","messageUuid":"message"}' });
+    expect(event).toHaveBeenLastCalledWith({ type: 'MESSAGE_RECEIPT', conversationUuid: 'one', messageUuid: 'message' });
     socket.onclose!({ code: 1006 });
     vi.advanceTimersByTime(1000);
     expect(MockSocket.instances).toHaveLength(2);

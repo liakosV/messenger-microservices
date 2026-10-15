@@ -25,6 +25,8 @@ export function useChatWorkspace(token: string, callerUuid: string, logout: () =
   }, [setSelectedId, loadConversations]);
   const messages = useMessages({
     token,
+    callerUuid,
+    onRead: conversations.syncUnread,
     selectedId: conversations.selectedId,
     activeId,
     onError,
@@ -38,11 +40,13 @@ export function useChatWorkspace(token: string, callerUuid: string, logout: () =
     token,
     onEvent: (event) => {
       if (!event.conversationUuid || !event.messageUuid) return;
+      void conversations.syncUnread();
       receiveActivity(event);
       receiveEvent(event);
       void loadConversations(0, true);
     },
     onConnected: () => {
+      void conversations.syncUnread();
       void loadConversations(0, true);
       if (activeId.current) void loadLatest(activeId.current, true);
     },

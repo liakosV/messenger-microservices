@@ -11,6 +11,6 @@ public class ChatMapper {
     }
     public MessageReadDTO toMessageDTO(Message message) {
         return new MessageReadDTO(message.getUuid(), message.getConversation().getUuid(), message.getSenderUuid(),
-                message.getContent(), message.getCreatedAt(), message.getUpdatedAt());
+                message.getContent(), message.getCreatedAt(), message.getUpdatedAt(), Set.copyOf(message.getDeliveredTo()), Set.copyOf(message.getReadBy()), message.getEditedAt());
     }
 }

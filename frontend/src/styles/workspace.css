@@ -373,3 +373,5 @@
 .dropdown button:hover {
   background: #f3f5ee;
 }
+
+.unread-notice { margin: 0 20px 12px; font-size: 0.85rem; color: var(--accent, #635bff); }

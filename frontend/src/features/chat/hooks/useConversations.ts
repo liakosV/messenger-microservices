@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ApiError } from '../../../shared/api/client';
+import { messageApi } from '../api/messageApi';
 import { conversationApi } from '../api/conversationApi';
 import { CONVERSATION_POLL_INTERVAL_MS } from '../config';
 import type { ChatEvent, Conversation } from '../model/types';
@@ -19,6 +20,20 @@ export function useConversations(
   const activeId = useRef(selectedId);
   const generation = useRef(0);
   activeId.current = selectedId;
+
+  const inboxGeneration = useRef(0);
+  const syncUnread = useCallback(async () => {
+    const id = ++inboxGeneration.current;
+    try {
+      const counts = await messageApi.syncInbox(token);
+      if (id === inboxGeneration.current) setUnread(counts);
+    } catch (error) { onError(error); }
+  }, [token, onError]);
+  useEffect(() => {
+    void syncUnread();
+    const interval = setInterval(() => void syncUnread(), CONVERSATION_POLL_INTERVAL_MS);
+    return () => { clearInterval(interval); inboxGeneration.current++; };
+  }, [syncUnread]);
 
   const loadConversations = useCallback(
     async (page = 0, quiet = false) => {
@@ -74,9 +89,7 @@ export function useConversations(
       generation.current++;
     };
   }, [loadConversations]);
-  useEffect(() => {
-    if (selectedId) setUnread((items) => ({ ...items, [selectedId]: 0 }));
-  }, [selectedId]);
+
 
   const setPreview = useCallback((uuid: string, content: string) => {
     setPreviews((items) => ({ ...items, [uuid]: content }));
@@ -85,6 +98,7 @@ export function useConversations(
     (event: ChatEvent) => {
       if (!event.conversationUuid) return;
       const uuid = event.conversationUuid;
+      if (event.type === 'MESSAGE_RECEIPT') return;
       setPreview(uuid, event.message?.content || 'Το μήνυμα διαγράφηκε');
       if (
         uuid !== activeId.current &&
@@ -117,6 +131,7 @@ export function useConversations(
     moreConversations,
     loadingList,
     unread,
+    syncUnread,
     previews,
     setSelectedId,
     loadConversations,

@@ -180,3 +180,5 @@
 .editing-banner button {
   margin-left: auto;
 }
+
+.receipt-status { display: inline-flex; align-items: center; gap: 3px; }

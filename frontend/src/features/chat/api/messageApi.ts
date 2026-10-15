@@ -6,6 +6,9 @@ import type { Message } from '../model/types';
 const messagesPath = (conversationUuid: string) =>
   `/chat/api/conversations/${conversationUuid}/messages`;
 export const messageApi = {
+  syncInbox: (token: string) => request<Record<string, number>>('/chat/api/inbox/sync', token, { method: 'POST' }),
+  read: (token: string, conversationUuid: string, ids: string[]) =>
+    request<void>(`${messagesPath(conversationUuid)}/read`, token, json(ids)),
   list: (token: string, conversationUuid: string, page = 0) =>
     request<Page<Message>>(
       `${messagesPath(conversationUuid)}?page=${page}&size=${MESSAGE_PAGE_SIZE}`,

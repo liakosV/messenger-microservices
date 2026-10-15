@@ -111,4 +111,33 @@ class ChatServiceTest {
         assertEquals("edited", messages.edit(conversation.getUuid(), message.getUuid(), caller, new MessageWriteDTO("edited")).content());
         messages.delete(conversation.getUuid(), message.getUuid(), caller); verify(messageRepository).delete(message);
     }
+    @Test
+    void loginDeliversButDoesNotReadAndAcknowledgementIsIdempotent() {
+        Message message = new Message();
+        message.setUuid(UUID.randomUUID()); message.setConversation(conversation);
+        message.setSenderUuid(other); message.setContent("offline message");
+        when(messageRepository.findUnread(caller, caller.toString())).thenReturn(List.of(message));
+        when(messageRepository.findForReceipt(message.getUuid(), 1L)).thenReturn(Optional.of(message));
+        assertEquals(Map.of(conversation.getUuid(), 1L), messages.syncInbox(caller));
+        assertEquals(Set.of(caller.toString()), message.getDeliveredTo());
+        assertTrue(message.getReadBy().isEmpty());
+        assertEquals(Map.of(conversation.getUuid(), 1L), messages.syncInbox(caller));
+        verify(events, times(1)).publishEvent(any(ChatEvent.class));
+        messages.acknowledge(conversation.getUuid(), caller, List.of(message.getUuid()));
+        messages.acknowledge(conversation.getUuid(), caller, List.of(message.getUuid()));
+        assertEquals(Set.of(caller.toString()), message.getReadBy());
+        assertTrue(messages.syncInbox(caller).isEmpty());
+        verify(events, times(2)).publishEvent(any(ChatEvent.class));
+    }
+    @Test
+    void outsidersCannotAcknowledgeAndSendersCannotReadTheirOwnMessages() {
+        assertThrows(ChatException.class, () -> messages.acknowledge(conversation.getUuid(), outsider, List.of(UUID.randomUUID())));
+        verifyNoInteractions(messageRepository);
+        Message message = new Message(); message.setUuid(UUID.randomUUID());
+        message.setConversation(conversation); message.setSenderUuid(caller);
+        when(messageRepository.findForReceipt(message.getUuid(), 1L)).thenReturn(Optional.of(message));
+        messages.acknowledge(conversation.getUuid(), caller, List.of(message.getUuid()));
+        assertTrue(message.getReadBy().isEmpty()); assertTrue(message.getDeliveredTo().isEmpty());
+        verifyNoInteractions(events);
+    }
 }

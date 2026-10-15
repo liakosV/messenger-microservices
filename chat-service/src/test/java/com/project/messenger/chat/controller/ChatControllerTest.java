@@ -86,13 +86,25 @@ class ChatControllerTest {
                 .andExpect(status().isBadRequest());
         verifyNoInteractions(conversations, messages);
     }
+    @Test
+    void inboxSyncUsesAuthenticatedCallerAndRejectsAnonymousRequests() throws Exception {
+        UUID conversation = UUID.randomUUID();
+        when(messages.syncInbox(caller)).thenReturn(Map.of(conversation, 3L));
+        mvc.perform(post("/api/inbox/sync")).andExpect(status().isUnauthorized());
+        verifyNoInteractions(messages);
+        mvc.perform(post("/api/inbox/sync").header("Authorization", "Bearer " + token)
+                .param("userUuid", UUID.randomUUID().toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$." + conversation).value(3));
+        verify(messages).syncInbox(caller);
+    }
     String token(String issuer, Instant expiry) {
         return NimbusJwtEncoder.withKeyPair((RSAPublicKey) keys.getPublic(), (RSAPrivateKey) keys.getPrivate()).build()
                 .encode(JwtEncoderParameters.from(JwtClaimsSet.builder().subject(caller.toString()).issuer(issuer)
                         .issuedAt(Instant.now().minusSeconds(600)).expiresAt(expiry).build())).getTokenValue();
     }
     @Configuration @EnableWebMvc @EnableWebSecurity
-    @Import({SecurityConfig.class, ConversationController.class, MessageController.class, ApiExceptionHandler.class})
+    @Import({SecurityConfig.class, ConversationController.class, MessageController.class, InboxController.class, ApiExceptionHandler.class})
     static class TestConfig {
         @Bean ConversationService conversations() { return mock(ConversationService.class); }
         @Bean MessageService messages() { return mock(MessageService.class); }

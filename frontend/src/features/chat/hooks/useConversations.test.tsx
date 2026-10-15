@@ -1,0 +1,23 @@
+import { afterEach, expect, it, vi } from 'vitest';
+import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
+import { useConversations } from './useConversations';
+import { messageApi } from '../api/messageApi';
+import { conversationApi } from '../api/conversationApi';
+vi.mock('../api/messageApi', () => ({ messageApi: { syncInbox: vi.fn() } }));
+vi.mock('../api/conversationApi', () => ({ conversationApi: { list: vi.fn() } }));
+afterEach(() => { cleanup(); vi.resetAllMocks(); });
+it('restores unread counts on login and keeps them until the server confirms reading', async () => {
+  vi.mocked(messageApi.syncInbox).mockResolvedValue({ conversation: 3 });
+  vi.mocked(conversationApi.list).mockResolvedValue({ content: [], page: 0, totalPages: 0, totalElements: 0, size: 30 });
+  const onError = vi.fn();
+  const first = renderHook(() => useConversations('token', 'me', onError));
+  await waitFor(() => expect(first.result.current.unread).toEqual({ conversation: 3 }));
+  act(() => first.result.current.setSelectedId('conversation'));
+  expect(first.result.current.unread.conversation).toBe(3);
+  first.unmount();
+  const second = renderHook(() => useConversations('new-token', 'me', onError));
+  await waitFor(() => expect(second.result.current.unread.conversation).toBe(3));
+  vi.mocked(messageApi.syncInbox).mockResolvedValue({});
+  await act(() => second.result.current.syncUnread());
+  expect(second.result.current.unread).toEqual({});
+});

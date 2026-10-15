@@ -17,4 +17,16 @@ public class Message extends ChatEntity {
     private UUID senderUuid;
     @Column(nullable = false, length = 2000)
     private String content;
+    @Column(name = "edited_at", columnDefinition = "DATETIME(6)")
+    private java.time.LocalDateTime editedAt;
+    @ElementCollection
+    @CollectionTable(name = "message_deliveries", joinColumns = @JoinColumn(name = "message_id"),
+            uniqueConstraints = @UniqueConstraint(columnNames = {"message_id", "user_uuid"}))
+    @Column(name = "user_uuid", length = 36, nullable = false)
+    private java.util.Set<String> deliveredTo = new java.util.HashSet<>();
+    @ElementCollection
+    @CollectionTable(name = "message_reads", joinColumns = @JoinColumn(name = "message_id"),
+            uniqueConstraints = @UniqueConstraint(columnNames = {"message_id", "user_uuid"}))
+    @Column(name = "user_uuid", length = 36, nullable = false)
+    private java.util.Set<String> readBy = new java.util.HashSet<>();
 }

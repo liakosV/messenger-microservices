@@ -24,6 +24,12 @@ public class MessageController {
             @RequestParam(defaultValue = "0") @Min(0) int page, @RequestParam(defaultValue = "50") @Min(1) @Max(100) int size) {
         return service.list(conversationUuid, UUID.fromString(jwt.getSubject()), page, size);
     }
+    @PostMapping("/read")
+    public ResponseEntity<Void> read(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID conversationUuid,
+            @RequestBody @Size(max = 100) java.util.List<UUID> ids) {
+        service.acknowledge(conversationUuid, UUID.fromString(jwt.getSubject()), ids);
+        return ResponseEntity.noContent().build();
+    }
     @PatchMapping("/{messageUuid}")
     public MessageReadDTO edit(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID conversationUuid,
             @PathVariable UUID messageUuid, @Valid @RequestBody MessageWriteDTO request) {

@@ -1,4 +1,4 @@
-import { Check, Pencil, Trash2 } from 'lucide-react';
+import { CheckCheck, Check, Pencil, Trash2 } from 'lucide-react';
 import { time } from '../../../shared/utils/format';
 import { useParticipantNames } from '../hooks/useParticipantNames';
 import { participantLabel } from '../model/conversations';
@@ -18,9 +18,13 @@ export function MessageBubble({ message, mine, onEdit, onDelete }: Props) {
         <div className="bubble">
           <p>{message.content}</p>
           <div className="message-meta">
-            {message.updatedAt !== message.createdAt && <span>επεξεργασμένο · </span>}
+            {message.editedAt && <span>επεξεργασμένο · </span>}
             <time dateTime={message.createdAt}>{time(message.createdAt)}</time>
-            {mine && <Check size={13} aria-label="Αποθηκεύτηκε" />}
+            {mine && <span className="receipt-status" aria-live="polite">
+              {message.readBy?.length ? <><CheckCheck size={13} /> Διαβάστηκε</> :
+                message.deliveredTo?.length ? <><CheckCheck size={13} /> Παραδόθηκε</> :
+                  <><Check size={13} /> Στάλθηκε</>}
+            </span>}
           </div>
         </div>
       </div>

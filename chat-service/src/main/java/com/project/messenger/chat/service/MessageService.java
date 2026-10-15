@@ -45,6 +45,7 @@ public class MessageService {
         var conversation = conversations.requireParticipant(conversationUuid, caller, true);
         Message message = requireSender(messageUuid, conversation.getId(), caller);
         message.setContent(request.content());
+        message.setEditedAt(java.time.LocalDateTime.now());
         var result = mapper.toMessageDTO(repository.saveAndFlush(message));
         events.publishEvent(new ChatEvent("MESSAGE_UPDATED", conversationUuid, result.uuid(), result, Set.copyOf(conversation.getParticipants())));
         return result;
@@ -55,6 +56,36 @@ public class MessageService {
         var conversation = conversations.requireParticipant(conversationUuid, caller, true);
         repository.delete(requireSender(messageUuid, conversation.getId(), caller));
         events.publishEvent(new ChatEvent("MESSAGE_DELETED", conversationUuid, messageUuid, null, Set.copyOf(conversation.getParticipants())));
+    }
+
+    @Transactional
+    public java.util.Map<UUID, Long> syncInbox(UUID caller) {
+        var counts = new java.util.HashMap<UUID, Long>();
+        for (var candidate : repository.findUnread(caller, caller.toString())) {
+            var message = repository.findForReceipt(candidate.getUuid(), candidate.getConversation().getId()).orElse(null);
+            if (message == null || message.getReadBy().contains(caller.toString())) continue;
+            counts.merge(message.getConversation().getUuid(), 1L, Long::sum);
+            if (message.getDeliveredTo().add(caller.toString())) publishReceipt(message);
+        }
+        return counts;
+    }
+
+    @Transactional
+    public void acknowledge(UUID conversationUuid, UUID caller, java.util.List<UUID> ids) {
+        var conversation = conversations.requireParticipant(conversationUuid, caller, false);
+        for (UUID id : ids) {
+            var message = repository.findForReceipt(id, conversation.getId())
+                    .orElseThrow(() -> new ChatException(HttpStatus.NOT_FOUND, "Message not found"));
+            if (message.getSenderUuid().equals(caller)) continue;
+            boolean changed = message.getDeliveredTo().add(caller.toString());
+            changed |= message.getReadBy().add(caller.toString());
+            if (changed) publishReceipt(message);
+        }
+    }
+
+    private void publishReceipt(Message message) {
+        events.publishEvent(new ChatEvent("MESSAGE_RECEIPT", message.getConversation().getUuid(), message.getUuid(),
+                mapper.toMessageDTO(message), Set.copyOf(message.getConversation().getParticipants())));
     }
 
     private Message requireSender(UUID uuid, Long conversationId, UUID caller) {

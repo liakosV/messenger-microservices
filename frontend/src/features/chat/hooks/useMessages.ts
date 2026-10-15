@@ -7,6 +7,8 @@ import type { ChatEvent, Message } from '../model/types';
 
 interface Options {
   token: string;
+  callerUuid: string;
+  onRead: () => Promise<void>;
   selectedId: string | null;
   activeId: RefObject<string | null>;
   onError: (error: unknown) => void;
@@ -15,6 +17,8 @@ interface Options {
 }
 export function useMessages({
   token,
+  callerUuid,
+  onRead,
   selectedId,
   activeId,
   onError,
@@ -84,6 +88,31 @@ export function useMessages({
       scrollNext.current = false;
     }
   }, [messages]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const markRead = async () => {
+      if (!selectedId || document.visibilityState === 'hidden' || loading || messageError) return;
+      const pending = messages.filter((m) => m.senderUuid !== callerUuid && !m.readBy?.includes(callerUuid));
+      if (!pending.length) return;
+      try {
+        for (let i = 0; i < pending.length; i += 100) {
+          await messageApi.read(token, selectedId, pending.slice(i, i + 100).map((m) => m.uuid));
+        }
+        if (!cancelled) {
+          const ids = new Set(pending.map((m) => m.uuid));
+          setMessages((items) => items.map((m) => ids.has(m.uuid) ? {
+            ...m, readBy: [...new Set([...(m.readBy || []), callerUuid])],
+            deliveredTo: [...new Set([...(m.deliveredTo || []), callerUuid])],
+          } : m));
+          await onRead();
+        }
+      } catch (error) { if (!cancelled) onError(error); }
+    };
+    void markRead();
+    document.addEventListener('visibilitychange', markRead);
+    return () => { cancelled = true; document.removeEventListener('visibilitychange', markRead); };
+  }, [messages, selectedId, token, callerUuid, loading, messageError, onRead, onError]);
 
   const loadOlder = async () => {
     if (!selectedId || olderPage < 0) return;

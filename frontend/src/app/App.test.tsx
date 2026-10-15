@@ -61,6 +61,7 @@ it('logs in, creates a conversation, sends and edits a message using the real AP
       calls.push({ path, options });
       if (path.endsWith('/login')) return reply({ accessToken: 'token', expiresIn: 900 });
       if (path.endsWith('/me')) return reply(profile);
+      if (path.endsWith('/inbox/sync')) return reply({});
       if (path.endsWith('/resolve-usernames')) return reply([{ uuid: other, username: 'maria' }]);
       if (path.endsWith('/conversations') && options.method === 'POST') return reply(conversation);
       if (path.includes('/messages?page')) return reply(page([]));
@@ -80,7 +81,7 @@ it('logs in, creates a conversation, sends and edits a message using the real AP
     }),
   );
   render(<App />);
-  await user.type(screen.getByLabelText('Όνομα χρήστη, email ή τηλέφωνο'), 'alex');
+  await user.type(screen.getByLabelText('Όνομα χρήστη ή email'), 'alex');
   await user.type(screen.getByLabelText('Κωδικός'), 'password');
   await user.click(screen.getByRole('button', { name: 'Πάμε στις συνομιλίες' }));
   await screen.findByText('Συνομιλίες');
@@ -129,6 +130,7 @@ it('loads the latest message page, applies WebSocket changes, and requires confi
     vi.fn(async (path: string, options: RequestInit) => {
       calls.push({ path, method: options.method });
       if (path.endsWith('/me')) return reply(profile);
+      if (path.endsWith('/inbox/sync')) return reply({});
       if (path.endsWith('/resolve-usernames')) return reply([{ uuid: other, username: 'maria' }]);
       if (options.method === 'DELETE') return new Response(null, { status: 204 });
       if (path.includes('/messages?page=0')) return reply({ ...page([]), totalPages: 3 });
@@ -172,9 +174,11 @@ it('keeps the new-conversation dialog open when identity rejects a participant',
     vi.fn(async (path: string, options: RequestInit) =>
       path.endsWith('/me')
         ? reply(profile)
-        : options.method === 'POST'
-          ? reply({ detail: 'One or more participants do not exist or are inactive' }, 400)
-          : reply(page([])),
+        : path.endsWith('/inbox/sync')
+          ? reply({})
+          : options.method === 'POST'
+            ? reply({ detail: 'One or more participants do not exist or are inactive' }, 400)
+            : reply(page([])),
     ),
   );
   const user = userEvent.setup();
@@ -193,7 +197,9 @@ it('sends only changed profile fields in PATCH and leaves a blank password out',
   const fetcher = vi.fn(async (path: string, options: RequestInit) =>
     path.endsWith('/me')
       ? reply(options.method === 'PATCH' ? { ...profile, email: 'new@example.com' } : profile)
-      : reply(page([])),
+      : path.endsWith('/inbox/sync')
+        ? reply({})
+        : reply(page([])),
   );
   vi.stubGlobal('fetch', fetcher);
   const user = userEvent.setup();
@@ -230,6 +236,8 @@ it('shows resolved usernames in the conversation, participants and incoming mess
   );
   const fetcher = vi.fn(async (path: string, options: RequestInit) => {
     if (path.endsWith('/me')) return reply(profile);
+    if (path.endsWith('/inbox/sync')) return reply({});
+    if (path.endsWith('/messages/read')) return new Response(null, { status: 204 });
     if (path.endsWith('/resolve-ids')) return reply([{ uuid: other, username: 'maria' }]);
     if (path.includes('/messages?page'))
       return reply(

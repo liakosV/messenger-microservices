@@ -20,7 +20,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(a -> a
                         .requestMatchers(HttpMethod.GET, "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**", "/ws/chat").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/conversations", "/api/conversations/**").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/conversations", "/api/conversations/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/conversations", "/api/conversations/**", "/api/inbox/sync").authenticated()
                         .requestMatchers(HttpMethod.PATCH, "/api/conversations/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/conversations/**").authenticated()
                         .anyRequest().denyAll())

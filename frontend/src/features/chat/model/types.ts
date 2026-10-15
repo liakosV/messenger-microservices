@@ -10,6 +10,9 @@ export interface Message {
   conversationUuid: string;
   senderUuid: string;
   content: string;
+  deliveredTo?: string[];
+  readBy?: string[];
+  editedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }
